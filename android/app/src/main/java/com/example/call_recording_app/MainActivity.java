@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import androidx.annotation.NonNull;
@@ -37,7 +38,7 @@ public class MainActivity extends FlutterActivity {
                         result.success("Calling " + number);
                     } else if (call.method.equals("getRecordings")) {
                         // Return list of recordings
-                        File dir = getExternalFilesDir(null);
+                        File dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Recordings");
                         File[] files = dir.listFiles();
                         if (files != null) {
                             List<String> recordings = new ArrayList<>();
@@ -53,12 +54,13 @@ public class MainActivity extends FlutterActivity {
                     }
                 });
 
-        // Check and request permissions for recording and call phone
+        // Check and request permissions for recording, call phone, and storage
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.RECORD_AUDIO, Manifest.permission.CALL_PHONE, Manifest.permission.READ_PHONE_STATE},
+                    new String[]{Manifest.permission.RECORD_AUDIO, Manifest.permission.CALL_PHONE, Manifest.permission.READ_PHONE_STATE, Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     1);
         }
     }
@@ -77,7 +79,12 @@ public class MainActivity extends FlutterActivity {
         try {
             // Create a unique file name with timestamp
             String timestamp = String.valueOf(System.currentTimeMillis());
-            audioFile = new File(getExternalFilesDir(null), "recorded_call_" + timestamp + ".3gp");
+            File publicDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Recordings");
+            if (!publicDir.exists()) {
+                publicDir.mkdirs(); // Create the directory if it doesn't exist
+            }
+            audioFile = new File(publicDir, "recorded_call_" + timestamp + ".3gp");
+
             recorder = new MediaRecorder();
             recorder.setAudioSource(MediaRecorder.AudioSource.VOICE_COMMUNICATION);
             recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);

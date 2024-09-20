@@ -3,6 +3,7 @@ package com.example.call_recording_app;
 import android.app.Service;
 import android.content.Intent;
 import android.media.MediaRecorder;
+import android.os.Environment;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -34,7 +35,12 @@ public class CallRecordingService extends Service {
         try {
             // Create a unique file name with timestamp
             String timestamp = String.valueOf(System.currentTimeMillis());
-            audioFile = new File(getExternalFilesDir(null), "recorded_call_" + timestamp + ".3gp");
+            File publicDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Recordings");
+            if (!publicDir.exists()) {
+                publicDir.mkdirs(); // Create the directory if it doesn't exist
+            }
+            audioFile = new File(publicDir, "recorded_call_" + timestamp + ".3gp");
+
             recorder = new MediaRecorder();
             recorder.setAudioSource(MediaRecorder.AudioSource.VOICE_COMMUNICATION);
             recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);

@@ -11,6 +11,13 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT"/>
     <uses-permission android:name="android.permission.CALL_PHONE" />
+    
+    <!-- Required for devices running Android 10 (API 29) or higher for access to files -->
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" />
+    
+    <!-- For accessing the microphone and phone calls -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
     <application
         android:label="call_recording_app"
@@ -44,7 +51,8 @@
         </receiver>
 
         <!-- Service to handle call recording -->
-        <service android:name=".CallRecordingService" android:enabled="true" android:exported="true"/>
+        <service android:name=".CallRecordingService" android:enabled="true" android:exported="true"
+            android:foregroundServiceType="microphone|phoneCall"/>
 
         <!-- Required metadata -->
         <meta-data
